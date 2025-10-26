@@ -37,6 +37,7 @@ def gcd(a: int, b: int) -> int:
     while b != 0:
         a, b = b, a % b
     return a
+    pass
 
 def multiplicative_inverse(e: int, phi: int) -> int:
     """
@@ -56,7 +57,8 @@ def multiplicative_inverse(e: int, phi: int) -> int:
     if old_r != 1:
         raise ValueError
     return old_s % phi
-    pass
+
+
 def generate_keypair(p: int, q: int) -> tp.Tuple[tp.Tuple[int, int], tp.Tuple[int, int]]:
     if not (is_prime(p) and is_prime(q)):
         raise ValueError("Both numbers must be prime.")
