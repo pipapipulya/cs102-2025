@@ -74,7 +74,7 @@ def generate_keypair(p: int, q: int) -> tp.Tuple[tp.Tuple[int, int], tp.Tuple[in
 
     d = multiplicative_inverse(e, phi)
     return (e, n), (d, n)
-    
+    pass
 
 def encrypt(pk: tp.Tuple[int, int], plaintext: str) -> tp.List[int]:
     # Unpack the key into it's components
