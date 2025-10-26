@@ -24,6 +24,7 @@ def is_prime(n: int) -> bool:
             return False
         i += 6
     return True
+    pass
 
 def gcd(a: int, b: int) -> int:
     """
@@ -36,7 +37,6 @@ def gcd(a: int, b: int) -> int:
     while b != 0:
         a, b = b, a % b
     return a
-    pass
 
 def multiplicative_inverse(e: int, phi: int) -> int:
     """
