@@ -57,7 +57,7 @@ def multiplicative_inverse(e: int, phi: int) -> int:
     if old_r != 1:
         raise ValueError
     return old_s % phi
-
+    pass
 
 def generate_keypair(p: int, q: int) -> tp.Tuple[tp.Tuple[int, int], tp.Tuple[int, int]]:
     if not (is_prime(p) and is_prime(q)):
@@ -74,7 +74,8 @@ def generate_keypair(p: int, q: int) -> tp.Tuple[tp.Tuple[int, int], tp.Tuple[in
 
     d = multiplicative_inverse(e, phi)
     return (e, n), (d, n)
-    pass
+    
+
 def encrypt(pk: tp.Tuple[int, int], plaintext: str) -> tp.List[int]:
     # Unpack the key into it's components
     key, n = pk
