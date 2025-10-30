@@ -12,19 +12,18 @@ def is_prime(n: int) -> bool:
     >>> is_prime(8)
     False
     """
-    if n <= 1:
+    if n < 2:
         return False
-    if n <= 3:
+    if n == 2:
         return True
-    if n % 2 == 0 or n % 3 == 0:
+    if n % 2 == 0:
         return False
-    i = 5
+    i = 3
     while i * i <= n:
-        if n % i == 0 or n % (i + 2) == 0:
+        if n % i == 0:
             return False
-        i += 6
+        i += 2
     return True
-    pass
 
 
 def gcd(a: int, b: int) -> int:
@@ -38,7 +37,6 @@ def gcd(a: int, b: int) -> int:
     while b != 0:
         a, b = b, a % b
     return a
-    pass
 
 
 def multiplicative_inverse(e: int, phi: int) -> int:
@@ -57,45 +55,39 @@ def multiplicative_inverse(e: int, phi: int) -> int:
         old_s, s = s, old_s - q * s
         old_t, t = t, old_t - q * t
     if old_r != 1:
-        raise ValueError
+        raise ValueError("Inverse does not exist.")
     return old_s % phi
-    pass
 
 
 def generate_keypair(p: int, q: int) -> tp.Tuple[tp.Tuple[int, int], tp.Tuple[int, int]]:
     if not (is_prime(p) and is_prime(q)):
         raise ValueError("Both numbers must be prime.")
-    elif p == q:
+    if p == q:
         raise ValueError("p and q cannot be equal")
-
     n = p * q
     phi = (p - 1) * (q - 1)
-
-    e = random.randrange(2, phi)
-    while gcd(e, phi) != 1:
-        e = random.randrange(2, phi)
-
+    e = random.randrange(1, phi)
+    g = gcd(e, phi)
+    while g != 1:
+        e = random.randrange(1, phi)
+        g = gcd(e, phi)
     d = multiplicative_inverse(e, phi)
     return (e, n), (d, n)
-    pass
 
 
 def encrypt(pk: tp.Tuple[int, int], plaintext: str) -> tp.List[int]:
-    # Unpack the key into it's components
     key, n = pk
-    # Convert each letter in the plaintext to numbers based on
-    # the character using a^b mod m
-    cipher = [(ord(char) ** key) % n for char in plaintext]
-    # Return the array of bytes
+    cipher = []
+    for ch in plaintext:
+        cipher.append(pow(ord(ch), key, n))
     return cipher
 
 
 def decrypt(pk: tp.Tuple[int, int], ciphertext: tp.List[int]) -> str:
-    # Unpack the key into its components
     key, n = pk
-    # Generate the plaintext based on the ciphertext and key using a^b mod m
-    plain = [chr((char**key) % n) for char in ciphertext]
-    # Return the array of bytes as a string
+    plain = []
+    for num in ciphertext:
+        plain.append(chr(pow(num, key, n)))
     return "".join(plain)
 
 
