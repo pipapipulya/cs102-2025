@@ -26,6 +26,7 @@ def is_prime(n: int) -> bool:
     return True
     pass
 
+
 def gcd(a: int, b: int) -> int:
     """
     Euclid's algorithm for determining the greatest common divisor.
@@ -39,6 +40,7 @@ def gcd(a: int, b: int) -> int:
     return a
     pass
 
+
 def multiplicative_inverse(e: int, phi: int) -> int:
     """
     Euclid's extended algorithm for finding the multiplicative
@@ -48,7 +50,7 @@ def multiplicative_inverse(e: int, phi: int) -> int:
     """
     old_r, r = e, phi
     old_s, s = 1, 0
-    old_t, t=0, 1
+    old_t, t = 0, 1
     while r != 0:
         q = old_r // r
         old_r, r = r, old_r - q * r
@@ -58,6 +60,7 @@ def multiplicative_inverse(e: int, phi: int) -> int:
         raise ValueError
     return old_s % phi
     pass
+
 
 def generate_keypair(p: int, q: int) -> tp.Tuple[tp.Tuple[int, int], tp.Tuple[int, int]]:
     if not (is_prime(p) and is_prime(q)):
@@ -76,6 +79,7 @@ def generate_keypair(p: int, q: int) -> tp.Tuple[tp.Tuple[int, int], tp.Tuple[in
     return (e, n), (d, n)
     pass
 
+
 def encrypt(pk: tp.Tuple[int, int], plaintext: str) -> tp.List[int]:
     # Unpack the key into it's components
     key, n = pk
@@ -90,7 +94,7 @@ def decrypt(pk: tp.Tuple[int, int], ciphertext: tp.List[int]) -> str:
     # Unpack the key into its components
     key, n = pk
     # Generate the plaintext based on the ciphertext and key using a^b mod m
-    plain = [chr((char ** key) % n) for char in ciphertext]
+    plain = [chr((char**key) % n) for char in ciphertext]
     # Return the array of bytes as a string
     return "".join(plain)
 
