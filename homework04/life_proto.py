@@ -95,7 +95,12 @@ class GameOfLife:
                 if 0 <= nx < self.cell_height and 0 <= ny < self.cell_width:
                     neighbours.append(self.grid[nx][ny])
 
-        return neighbours
+        Returns
+        ----------
+        out : Cells
+            Список соседних клеток, в котором каждая позиция – 0 или 1.
+        """
+        pass
 
     def get_next_generation(self) -> Grid:
         new_grid = self.create_grid()
