@@ -1,3 +1,4 @@
+import pathlib
 import random
 import typing as tp
 
@@ -10,104 +11,80 @@ Grid = tp.List[Cells]
 
 
 class GameOfLife:
-    def __init__(self, width: int = 640, height: int = 480, cell_size: int = 10, speed: int = 10) -> None:
-        self.width = width
-        self.height = height
-        self.cell_size = cell_size
-
-        # Устанавливаем размер окна
-        self.screen_size = width, height
-        # Создание нового окна
-        self.screen = pygame.display.set_mode(self.screen_size)
-
-        # Вычисляем количество ячеек по вертикали и горизонтали
-        self.cell_width = self.width // self.cell_size
-        self.cell_height = self.height // self.cell_size
-
-        # Скорость протекания игры
-        self.speed = speed
-
-    def draw_lines(self) -> None:
-        """Отрисовать сетку"""
-        for x in range(0, self.width, self.cell_size):
-            pygame.draw.line(self.screen, pygame.Color("black"), (x, 0), (x, self.height))
-        for y in range(0, self.height, self.cell_size):
-            pygame.draw.line(self.screen, pygame.Color("black"), (0, y), (self.width, y))
-
-    def run(self) -> None:
-        pygame.init()
-        clock = pygame.time.Clock()
-        pygame.display.set_caption("Game of Life")
-
-        self.grid = self.create_grid(randomize=True)
-
-        running = True
-        while running:
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    running = False
-
-            self.screen.fill(pygame.Color("white"))
-
-            self.draw_grid()
-            self.draw_lines()
-
-            self.grid = self.get_next_generation()
-
-            pygame.display.flip()
-            clock.tick(self.speed)
-
-        pygame.quit()
+    def __init__(
+        self,
+        size: tp.Tuple[int, int],
+        randomize: bool = True,
+        max_generations: tp.Optional[float] = float("inf"),
+    ) -> None:
+        self.rows, self.cols = size
+        self.prev_generation = self.create_grid()
+        self.curr_generation = self.create_grid(randomize=randomize)
+        self.max_generations = max_generations
+        self.generations = 1
 
     def create_grid(self, randomize: bool = False) -> Grid:
-        grid = []
-        for _ in range(self.cell_height):
-            row = []
-            for _ in range(self.cell_width):
-                if randomize:
-                    row.append(random.randint(0, 1))
-                else:
-                    row.append(0)
+        grid: Grid = []
+        for _ in range(self.rows):
+            if randomize:
+                row = [random.randint(0, 1) for _ in range(self.cols)]
+            else:
+                row = [0 for _ in range(self.cols)]
             grid.append(row)
         return grid
 
-    def draw_grid(self) -> None:
-        for i in range(self.cell_height):
-            for j in range(self.cell_width):
-                if self.grid[i][j] == 1:
-                    pygame.draw.rect(
-                        self.screen,
-                        pygame.Color("black"),
-                        (j * self.cell_size, i * self.cell_size, self.cell_size, self.cell_size),
-                    )
-
     def get_neighbours(self, cell: Cell) -> Cells:
-        x, y = cell
-        neighbours = []
+        r, c = cell
+        neighbours: Cells = []
 
-        for dx in (-1, 0, 1):
-            for dy in (-1, 0, 1):
-                if dx == 0 and dy == 0:
+        for dr in (-1, 0, 1):
+            for dc in (-1, 0, 1):
+                if dr == 0 and dc == 0:
                     continue
-
-                nx, ny = x + dx, y + dy
-
-                if 0 <= nx < self.cell_height and 0 <= ny < self.cell_width:
-                    neighbours.append(self.grid[nx][ny])
+                nr, nc = r + dr, c + dc
+                if 0 <= nr < self.rows and 0 <= nc < self.cols:
+                    neighbours.append(self.curr_generation[nr][nc])
 
         return neighbours
 
     def get_next_generation(self) -> Grid:
-        new_grid = self.create_grid()
+        new_grid = self.create_grid(randomize=False)
 
-        for i in range(self.cell_height):
-            for j in range(self.cell_width):
-                neighbours = self.get_neighbours((i, j))
-                alive = self.grid[i][j]
+        for r in range(self.rows):
+            for c in range(self.cols):
+                alive = self.curr_generation[r][c] == 1
+                alive_cnt = sum(self.get_neighbours((r, c)))
 
-                if alive == 1 and sum(neighbours) in (2, 3):
-                    new_grid[i][j] = 1
-                elif alive == 0 and sum(neighbours) == 3:
-                    new_grid[i][j] = 1
+                if alive:
+                    new_grid[r][c] = 1 if alive_cnt in (2, 3) else 0
+                else:
+                    new_grid[r][c] = 1 if alive_cnt == 3 else 0
 
         return new_grid
+
+    def step(self) -> None:
+        self.prev_generation = [row[:] for row in self.curr_generation]
+        self.curr_generation = self.get_next_generation()
+        self.generations += 1
+
+    @property
+    def is_max_generations_exceeded(self) -> bool:
+        return self.generations >= self.max_generations
+
+    @property
+    def is_changing(self) -> bool:
+        return self.curr_generation != self.prev_generation
+
+    @staticmethod
+    def from_file(filename: pathlib.Path) -> "GameOfLife":
+        with open(filename) as f:
+            data = [[int(x) for x in line.strip()] for line in f.readlines()]
+
+        game = GameOfLife((len(data), len(data[0])), randomize=False)
+        game.curr_generation = data
+        return game
+
+    def save(self, filename: pathlib.Path) -> None:
+        with open(filename, "w") as f:
+            for row in self.curr_generation:
+                f.write("".join(map(str, row)) + "\n")
